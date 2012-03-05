@@ -1,0 +1,68 @@
+#header {
+    margin-top: 20px;
+}
+h1 {
+    color: #49708a;
+    background-color: white;
+    width:200px;
+    font-size: 26px;
+
+}
+h1 span {
+    color: #88abc2;
+}
+#logo {
+    text-decoration: none;
+    float: left;
+}
+
+h3 {
+    float: left;
+    color: #49708a;
+    padding: 4px;
+}
+
+#top-bar {
+    background: #d0e0eb;
+
+
+}
+
+
+.stage {
+    margin-top: 10px;
+    /*padding: 5px 20px 20px 20px;*/
+    border-left: 1px dashed #d1d1d1;
+
+
+}
+.stage ul {
+    min-height: 400px;
+}
+
+.stage h2 {
+    color: #49708a;
+    margin-left: 10px;
+}
+
+.stage ul {
+    clear: both;
+}
+
+
+.stories li {
+    margin-left: 10px;
+    margin-right: -20px;
+}
+.story p {
+    padding: 5px;
+}
+
+.stories ul {
+    padding: 0px;
+    margin: 0px;
+}
+
+.stories li {
+    list-style-type: none;
+}

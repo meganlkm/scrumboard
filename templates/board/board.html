@@ -1,0 +1,220 @@
+{% extends 'base.html' %}
+
+{% block javascripts %}
+    <script type="text/javascript">
+
+        var Board = Backbone.Model.extend({
+            urlRoot : "/api/board/"
+        })
+        var BoardSet = Backbone.Collection.extend({
+            url : "/api/board/",
+            model : Board
+        })
+
+        var Story = Backbone.Model.extend({
+            urlRoot : "/api/story/",
+            defaults : {
+                'color' : 'red',
+            }
+        });
+        var StorySet = Backbone.Collection.extend({
+            url : "/api/story/"
+        });
+
+        var Stage = Backbone.Model.extend({
+            initialize: function () {
+//                this.stories = new StorySet();
+//                this.stories.url = '/api/stage/' + this.id + '/stories/';
+            }
+        })
+        var StageSet = Backbone.Collection.extend({
+            url : "/api/stage/"
+        })
+
+        var StoryView = Backbone.View.extend({
+            tagName : "li",
+            template : _.template( $("#StoryTemplate").html()),
+            events : {
+                'dblclick .description' : 'edit_story',
+            },
+            edit_story : function () {
+                var description = window.prompt("Description ?", this.model.get("description"))
+                this.model.set("description", description);
+                this.model.save()
+            },
+            initialize: function () {
+                this.model.bind('change', this.render, this);
+                //$(this.el).data("backbone-view", this);
+            },
+            render: function () {
+                $(this.el).data("model",this.model)
+                $(this.el).html(this.template(this.model.toJSON())).addClass("story")
+                return this;
+            }
+        })
+
+        var StorySetView = Backbone.View.extend({
+            tagName : "ul",
+            initialize : function (model, options) {
+                this.stage_id = options["stage_id"];
+                this.model.bind("reset", this.render, this);
+                this.model.bind("add", this.render, this);
+                $(this.el).sortable({
+                    items: "li:not(.not-sortable)",
+                    connectWith: ".stage ul",
+                    stop : function (event, ui) {
+                        console.log(event)
+                    }
+                });
+
+            },
+            events : {
+                'click .new' : 'new_story'
+            },
+            new_story : function () {
+                var description = window.prompt("Description ?")
+                var story = new Story({'description' : description, 'stage' : this.stage_id})
+                story.save()
+                this.model.add(story);
+            },
+            render : function () {
+                var self = this;
+                $(self.el).empty()
+                _.each(this.model.models, function (story) {
+                    $(self.el).append(  new StoryView({model:story}).render().el  )
+                })
+                $(self.el).append($("<li class='not-sortable'>").html($("<a class='new btn'>").html("New")))
+                return self;
+            }
+
+        })
+
+        var StageItemView = Backbone.View.extend({
+            tagName : "div",
+            template : _.template( $("#StageTemplate").html()),
+            initialize : function () {
+                this.model.bind('change', this.render, this)
+                //this.model.stories.bind('reset', this.fillStories, this)
+                this.stories = new StorySet()
+                this.storyset_view = new StorySetView({model:this.stories}, {stage_id:this.model.id})
+                this.stories.fetch( {data:{stage_id :this.model.id}} )
+            },
+            render : function () {
+
+                $(this.el).addClass("span2").addClass("stage")
+                .html(this.template(this.model.toJSON()))
+                .find(".stories").html( this.storyset_view.el )
+                return this;
+            }
+        })
+
+        var StageSetView = Backbone.View.extend({
+            el : $("#stages"),
+            initialize : function () {
+                this.model.bind('reset', this.render, this)
+            },
+
+            render : function () {
+                var self = this;
+                $(self.el).empty()
+                _.each(self.model.models, function (stage) {
+                    $(self.el).append(  new StageItemView({model:stage}).render().el  )
+                }, this)
+                return self;
+            }
+
+        })
+
+        var BoardSetView = Backbone.View.extend({
+            el : $("#select-board ul"),
+            template : _.template( $("#BoardSetTemplate").html()),
+            events : {
+                "click .new" : "new_board"
+            },
+            new_board : function () {
+                var board_title = window.prompt("Title ?");
+                var board = new Board({"title" : board_title})
+                board.save()
+                this.model.fetch()
+            },
+            initialize : function () {
+                this.model.bind("reset", this.render, this);
+                this.model.bind("add", this.render, this);
+            },
+            render : function () {
+                $(this.el).html( this.template({'items' : this.model.toJSON() } ) )
+                return this;
+            }
+        })
+
+        var AppRouter = Backbone.Router.extend({
+            routes : {
+                "" : "list",
+                "board/:id" : "board",
+            },
+            list : function () {
+                this.boards = new BoardSet();
+                var boards_view = new BoardSetView({model:this.boards})
+                this.boards.fetch(); // retrieve from server
+            },
+            board : function (id) {
+                var board = this.boards.get(id);
+                var stages = new StageSet();
+                var board_view = new StageSetView({model:stages})
+                stages.fetch({data:{board_id:id}})
+            }
+        })
+
+        var app = new AppRouter();
+        Backbone.history.start();
+
+    </script>
+{% endblock %}
+
+{% block content %}
+    <div class="container-fluid">
+        <div class="row-fluid" id="header">
+            <div class="span2" >
+
+                <a href="/" id="logo"><h1>Scrum<span>Board</span></h1></a>
+                </div>
+            <div class="span10" id="top-bar"><h3 id="board-title">&nbsp;</h3>
+
+
+            </div>
+        </div>
+        <div class="row-fluid" id="app">
+
+
+            <div class="span2 board-info" id="select-board">
+                <h2 id="board-name">Select a Board</h2>
+                <ul></ul>
+            </div>
+
+            <div id="stages">
+
+            </div>
+
+
+
+        </div>
+    </div>
+
+    <script type="text/template" id="BoardSetTemplate">
+        <% _.each(items, function (item) { %>
+        <li><a href="#board/<%= item.id %>"><%= item.title %></a></li>
+        <% }); %>
+        <li><a class="btn new" href="javascript:void 0">Add Board</a></li>
+    </script>
+
+    <script type="text/template" id="StageTemplate">
+            <h2><%= get_title_display %></h2>
+            <div class="stories"></div>
+    </script>
+
+    <script type="text/template" id="StoryTemplate">
+            <p class="description" style="background-color:<%=color%>">
+                <%= description %>
+            </p>
+    </script>
+{% endblock %}
