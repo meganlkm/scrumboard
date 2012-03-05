@@ -3,7 +3,7 @@ from board.models import Board, Stage, Story
 
 class StoryHandler(BaseHandler):
     model = Story
-    fields = ('id', 'description', 'color', 'order')
+    fields = ('id', 'description', 'color', 'order', 'stage_id')
 
     def read(self, request, *args, **kwargs):
         _read = super(StoryHandler, self).read(request, *args, **kwargs)
@@ -16,7 +16,7 @@ class StoryHandler(BaseHandler):
         story = Story()
         story.description = attrs["description"]
         story.color = attrs["color"]
-        story.stage_id = attrs["stage"]
+        story.stage_id = attrs["stage_id"]
         story.save()
         return story
 

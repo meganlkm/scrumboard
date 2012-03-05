@@ -38,9 +38,26 @@
                 'dblclick .description' : 'edit_story',
             },
             edit_story : function () {
-                var description = window.prompt("Description ?", this.model.get("description"))
-                this.model.set("description", description);
-                this.model.save()
+                var self = this;
+                $("#story-form").html(_.template($("#StoryForm").html())( {} ))
+                $("#story-form").modal("show");
+                $("#story-form #description").val(this.model.get("description"))
+                $("#story-form #color").val(this.model.get("color"))
+                $("#story-form").find("h2").html("Edit Story")
+
+                $("#story-form").find(".save").click(function () {
+                    data = {
+                        stage_id : self.stage_id
+                    }
+                    var form_data = $("#story-form form").serializeArray();
+                    for (var i in form_data) {
+                        data[form_data[i].name]=form_data[i].value;
+                    }
+                    self.model.set(data);
+                    self.model.save();
+                    $("#story-form").modal("hide");
+                })
+
             },
             initialize: function () {
                 this.model.bind('change', this.render, this);
@@ -59,23 +76,50 @@
                 this.stage_id = options["stage_id"];
                 this.model.bind("reset", this.render, this);
                 this.model.bind("add", this.render, this);
+                var self = this;
                 $(this.el).sortable({
                     items: "li:not(.not-sortable)",
                     connectWith: ".stage ul",
                     stop : function (event, ui) {
-                        console.log(event)
+                        /* Swap stages */
+                        var swap_stage = $(ui.item).parent().data("stage_id");
+                        $(ui.item).data("model").set( {"stage_id":swap_stage})
+                        $(ui.item).data("model").save()
+
+                        /* Ordering items */
+                        var i = 1;
+                        $(this).find(".story").each(function () {
+                            var model = $(this).data("model");
+                            model.set({"order" : i++});
+                            model.save()
+                        })
                     }
-                });
+                }).data("stage_id", this.stage_id);
 
             },
             events : {
                 'click .new' : 'new_story'
             },
             new_story : function () {
-                var description = window.prompt("Description ?")
-                var story = new Story({'description' : description, 'stage' : this.stage_id})
-                story.save()
-                this.model.add(story);
+                var self = this;
+                $("#story-form").html(_.template($("#StoryForm").html())( {} ))
+                $("#story-form").modal("show")
+                $("#story-form").find("h2").html("New Story")
+
+                $("#story-form").find(".save").click(function () {
+                    data = {
+                        stage_id : self.stage_id
+                    }
+                    var form_data = $("#story-form form").serializeArray();
+                    for (var i in form_data) {
+                        data[form_data[i].name]=form_data[i].value;
+                    }
+                    var story = new Story(data)
+                    story.save()
+                    self.model.add(story);
+                    $("#story-form").modal("hide");
+                })
+
             },
             render : function () {
                 var self = this;
@@ -162,6 +206,7 @@
                 var stages = new StageSet();
                 var board_view = new StageSetView({model:stages})
                 stages.fetch({data:{board_id:id}})
+                $("#board-title").html(board.get("title"))
             }
         })
 
@@ -199,6 +244,34 @@
 
         </div>
     </div>
+
+
+    <div class="modal hide" id="story-form"></div>
+
+    <script type="text/template" id="StoryForm">
+        <div class="modal-header">
+                <a class="close" data-dismiss="modal">×</a>
+                <h2>Modal header</h2>
+            </div>
+            <div class="modal-body">
+                <form action="#">
+                    <label>Description</label>
+                    <textarea name="description" id="description" cols="60" rows="5"></textarea>
+                    <label>Color</label>
+                    <select name="color" id="color">
+                        <option value="#adff2f" style="">Green</option>
+                        <option value="#ffada5">Pink</option>
+                        <option value="yellow">Yellow</option>
+                        <option value="#87cefa">Blue</option>
+                    </select>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <a href="javascript: void 0" class="btn save btn-primary">Save changes</a>
+{#                <a href="#" class="btn">Close</a>#}
+        </div>
+    </script>
+
 
     <script type="text/template" id="BoardSetTemplate">
         <% _.each(items, function (item) { %>
