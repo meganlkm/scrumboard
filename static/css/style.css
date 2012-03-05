@@ -24,8 +24,7 @@ h3 {
 
 #top-bar {
     background: #d0e0eb;
-
-
+    margin-left: 30px;
 }
 
 
@@ -65,4 +64,15 @@ h3 {
 
 .stories li {
     list-style-type: none;
+}
+
+#select-board ul {
+    margin: 0px;
+    padding: 0px;
+}
+
+#select-board ul li {
+    list-style-type: none;
+    padding: 0px;
+    margin: 5px;
 }
