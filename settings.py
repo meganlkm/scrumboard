@@ -110,7 +110,7 @@ MIDDLEWARE_CLASSES = (
 
 ROOT_URLCONF = 'scrumboard.urls'
 
-TEMPLATE_DIRS = ('C:/django/scrumboard/templates',)
+TEMPLATE_DIRS = (here('templates'),)
 
 INSTALLED_APPS = (
     'django.contrib.auth',
