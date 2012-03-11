@@ -7,7 +7,7 @@ stage_resource = Resource(handler=StageHandler)
 story_resource = Resource(handler=StoryHandler)
 
 urlpatterns = patterns('',
-    url(r'^$', 'scrumboard.board.views.board', name='board'),
+    url(r'^$', 'scrumboard.board.views.app', name='dashboard'),
     url(r'^api/stage/$', stage_resource),
     url(r'^api/stage/(?P<id>[^/]+)/$', stage_resource),
     url(r'^api/story/$', story_resource,),
