@@ -1,0 +1,338 @@
+{% extends 'base.html' %}
+
+{% block javascripts %}
+    <script type="text/javascript">
+
+        var Board = Backbone.Model.extend({
+            urlRoot : "/api/board/"
+        })
+        var BoardSet = Backbone.Collection.extend({
+            url : "/api/board/",
+            model : Board
+        })
+
+        var Story = Backbone.Model.extend({
+            urlRoot : "/api/story/"
+
+        });
+        var StorySet = Backbone.Collection.extend({
+            url : "/api/story/"
+        });
+
+        var Stage = Backbone.Model.extend({
+            initialize: function () {
+//                this.stories = new StorySet();
+//                this.stories.url = '/api/stage/' + this.id + '/stories/';
+            }
+        })
+        var StageSet = Backbone.Collection.extend({
+            url : "/api/stage/"
+        })
+
+        var StoryView = Backbone.View.extend({
+            tagName : "li",
+            template : _.template( $("#StoryTemplate").html()),
+            events : {
+                'click a' : 'edit_story',
+            },
+            edit_story : function () {
+                var self = this;
+                $("#story-form").html(_.template($("#StoryForm").html())( {} ))
+                $("#story-form").modal("show");
+                $("#story-form #description").val(this.model.get("description"))
+                $("#story-form #color").val(this.model.get("color"))
+                $("#story-form").find("h2").html("Edit Story")
+
+                $("#story-form").find(".save").click(function () {
+                    data = {
+                        stage_id : self.stage_id
+                    }
+                    var form_data = $("#story-form form").serializeArray();
+                    for (var i in form_data) {
+                        data[form_data[i].name]=form_data[i].value;
+                    }
+                    self.model.set(data);
+                    self.model.save();
+                    $("#story-form").modal("hide");
+                })
+
+            },
+            initialize: function () {
+                this.model.bind('change', this.render, this);
+                //$(this.el).data("backbone-view", this);
+            },
+            render: function () {
+                $(this.el).data("model",this.model)
+                $(this.el).html(this.template(this.model.toJSON())).addClass("story")
+                // $(this.el).css("background-color", this.model.get("color"))
+                return this;
+            }
+        })
+
+        var StorySetView = Backbone.View.extend({
+            tagName : "ul",
+            initialize : function (model, options) {
+                this.stage_id = options["stage_id"];
+                this.model.bind("reset", this.render, this);
+                this.model.bind("add", this.render, this);
+                var self = this;
+                $(this.el).sortable({
+                    items: "li:not(.not-sortable)",
+                    connectWith: ".stage ul",
+                    stop : function (event, ui) {
+                        /* Swap stages */
+                        var swap_stage = $(ui.item).parent().data("stage_id");
+                        $(ui.item).data("model").set( {"stage_id":swap_stage})
+                        $(ui.item).data("model").save()
+
+                        /* Ordering items */
+                        var i = 1;
+                        $(this).find(".story").each(function () {
+                            var model = $(this).data("model");
+                            model.set({"order" : i++});
+                            model.save()
+                        })
+                    }
+                }).data("stage_id", this.stage_id);
+
+            },
+            events : {
+                'click .new' : 'new_story'
+            },
+            new_story : function () {
+                var story = new Story()
+                story.set({
+                    "description": "",
+                    "color" : "yellow",
+                    "stage_id" : this.stage_id
+                })
+                story.save()
+                this.model.add(story);
+                $(this.el).find('drop').remove()
+            },
+            render : function () {
+                var self = this;
+                $(self.el).empty()
+                _.each(this.model.models, function (story) {
+                    $(self.el).append(  new StoryView({model:story}).render().el  )
+                })
+                if (!this.model.models.length) {
+                    $(self.el).append("<li class='drop'>");
+                }
+                $(self.el).append($("<li style='' class='not-sortable'>").html($("<a class='new btn btn-large'>").html("New")))
+                return self;
+            }
+
+        })
+
+        var StageItemView = Backbone.View.extend({
+            tagName : "div",
+            template : _.template( $("#StageTemplate").html()),
+            initialize : function () {
+                this.model.bind('change', this.render, this)
+                //this.model.stories.bind('reset', this.fillStories, this)
+                this.stories = new StorySet()
+                this.storyset_view = new StorySetView({model:this.stories}, {stage_id:this.model.id})
+                this.stories.fetch( {data:{stage_id :this.model.id}} )
+            },
+            render : function () {
+                $(this.el).addClass("stage")
+                .html(this.template(this.model.toJSON()))
+                .find(".stories").html( this.storyset_view.el )
+                return this;
+            }
+        })
+
+        var StageSetView = Backbone.View.extend({
+            el : $("#stages"),
+            initialize : function () {
+                this.model.bind('reset', this.render, this)
+            },
+
+            render : function () {
+                var self = this;
+                $(self.el).empty()
+                _.each(self.model.models, function (stage) {
+                    $(self.el).append(  new StageItemView({model:stage}).render().el  )
+                }, this)
+                return self;
+            }
+
+        })
+
+        var BoardItemView = Backbone.View.extend({
+            tagName : "li" ,
+            template : _.template( $("#BoardItemTemplate").html()),
+            events : {
+                "click a" : "make_active"
+            },
+            initialize : function () {
+                $(this.el).attr("id", "boarditem-" + this.model.id)
+            },
+            make_active : function () {
+                $(this.el).siblings().removeClass("active")
+                $(this.el).addClass("active");
+            },
+            render : function () {
+                $(this.el).html(this.template({"item" : this.model.toJSON()}))
+                return this;
+            }
+        })
+
+
+        var BoardSetView = Backbone.View.extend({
+            el : $("#select-board"),
+            events : {
+                "click .new" : "new_board"
+            },
+            new_board : function () {
+                var board_title = window.prompt("Title ?");
+                var board = new Board({"title" : board_title})
+                board.save()
+                this.model.fetch()
+            },
+            initialize : function () {
+                var self = this;
+                this.boarditem_views = []
+                this.model.bind("reset", this.render, this);
+                this.model.bind("add", this.render, this);
+            },
+            render : function () {
+                var self = this;
+                $(this.el).find("ul").empty();
+                _.forEach(this.model.models, function (item) {
+                    $(self.el).find("ul").append(   (new BoardItemView({model:item})).render().el   )
+                })
+                return this;
+            }
+        })
+
+        var BoardView = Backbone.View.extend({
+            el : $("#board-info"),
+            initialize : function () {
+                this.model.bind("change", this.render, this)
+            },
+            events : {
+                "click .destroy" : 'destroy',
+                "click .change" : 'change',
+            },
+            change : function () {
+                var title = window.prompt("Title ?", this.model.get("title"))
+                this.model.set("title", title)
+                this.model.save({ success: this.render })
+            },
+            destroy : function () {
+                this.model.destroy({
+                    success : function () {
+                        window.location = '/';
+                    }
+                });
+
+            },
+            render : function () {
+                $(this.el).find("#board-title").html(this.model.get("title"))
+            }
+        })
+
+        var AppRouter = Backbone.Router.extend({
+            routes : {
+                "" : "list",
+                "board/:id" : "board",
+            },
+            list : function () {
+                this.boards = new BoardSet();
+                this.boards_view = new BoardSetView({model:this.boards})
+                this.boards.fetch(); // retrieve from server
+            },
+            board : function (id) {
+                var self = this;
+                var _select_board = function () {
+                    $("#boarditem-" + id).addClass("active").siblings().removeClass("active")
+                }
+                if (!this.boards_view) this.list();
+                this.boards.on("reset", _select_board);
+                _select_board();
+                var stages = new StageSet();
+                new StageSetView({model:stages})
+                stages.fetch({data:{board_id:id}})
+
+                var board = new Board({id : id})
+                new BoardView({model:board})
+                board.fetch()
+
+            }
+        })
+        var app = new AppRouter();
+        Backbone.history.start();
+
+
+    </script>
+{% endblock %}
+
+{% block top %}
+    <div id="board-info">
+        <h3 id="board-title"></h3>
+
+        <div style="float:right; padding:4px 10px 0px 2px;">
+            <a class="destroy" href="javascript:void 0">Delete</a> <br>
+            <a class="change" href="javascript:void 0">Change</a>
+        </div>
+    </div>
+{% endblock %}
+
+{% block content %}
+    <div id="select-board" >
+        <a style="float:right; margin-top:4px; margin-bottom:3px;" class="btn new" href="javascript:void 0">Add Board</a>
+         <ul class="nav nav-tabs"></ul>
+    </div>
+        <div class="row-fluid" id="app">
+
+
+            <div id="stages">
+
+            </div>
+        </div>
+
+        <div class="modal hide" id="story-form"></div>
+
+        <script type="text/template" id="StoryForm">
+            <div class="modal-header">
+                <a class="close" data-dismiss="modal">×</a>
+                <h2>Modal header</h2>
+            </div>
+            <div class="modal-body">
+                <form action="#">
+                    <label>Description</label>
+                    <textarea name="description" id="description" cols="60" rows="5"></textarea>
+                    <label>Color</label>
+                    <select name="color" id="color">
+                        <option value="#adff2f" style="">Green</option>
+                        <option value="#ffada5">Pink</option>
+                        <option value="yellow">Yellow</option>
+                        <option value="#87cefa">Blue</option>
+                    </select>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <a href="javascript: void 0" class="btn save btn-primary">Save changes</a>
+                {#                <a href="#" class="btn">Close</a>#}
+            </div>
+        </script>
+
+
+        <script type="text/template" id="BoardItemTemplate">
+            <a href="#board/<%= item.id %>"><%= item.title %></a>
+        </script>
+
+        <script type="text/template" id="StageTemplate">
+            <h2><%= get_title_display %></h2>
+            <div class="stories"></div>
+        </script>
+
+        <script type="text/template" id="StoryTemplate">
+            <a class="description" href="javascript: void 0" style="background-color:<%=color%>">
+                <%= description %>
+            </a>
+        </script>
+
+{% endblock %}
