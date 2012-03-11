@@ -1,5 +1,5 @@
 from piston.handler import BaseHandler
-from board.models import Board, Stage, Story
+from scrumboard.board.models import Board, Stage, Story
 
 class StoryHandler(BaseHandler):
     model = Story
@@ -41,6 +41,7 @@ class BoardHandler(BaseHandler):
         attrs = self.flatten_dict(request.data)
         board = Board()
         board.title= attrs["title"]
-        board.user = request.user
+        # board.user = request.user
+        board.user_id = 1 # zulele
         board.save()
         return board
