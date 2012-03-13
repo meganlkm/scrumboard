@@ -32,10 +32,22 @@ class StoryResource(ModelResource):
         return super(StoryResource, self).obj_create(bundle, request, stage=stage)
 
     def obj_update(self, bundle, request=None, **kwargs):
-        #stage = Stage.objects.get(id=bundle.data.pop("stage")["id"])
-        if 'order' in bundle.data and not bundle.data['order']:
-            bundle.data['order'] = 1
-        return super(StoryResource, self).obj_update(bundle, request)
+        """
+        Haddinden fazla pis. Heroku uzerinde cok degisilik olaylar donuyor.
+        Simdilik boyle.
+        """
+
+        story = Story.objects.get(id=kwargs.get("id"))
+        story.description = kwargs.get("description")
+        story.color = kwargs.get("color")
+        story.stage_id = kwargs.get("stage").get("id")
+        story.order = kwargs.get("order")
+        story.save()
+
+#        #stage = Stage.objects.get(id=bundle.data.pop("stage")["id"])
+#        if 'order' in bundle.data and not bundle.data['order']:
+#            bundle.data['order'] = 1
+#        return super(StoryResource, self).obj_update(bundle, request)
 
     class Meta:
         queryset = Story.objects.all()
