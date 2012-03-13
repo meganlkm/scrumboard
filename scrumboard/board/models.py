@@ -49,7 +49,14 @@ class Story(models.Model):
     def save(self, **kwargs):
         super(Story, self).save(**kwargs)
         if self.pk and not self.order:
-            self.order = (self.stage.story_set.aggregate(Max("order")).get("order__max") or 0)  + 1
+            # self.order = (self.stage.story_set.aggregate(Max("order")).get("order__max") or 0)  + 1
+            # TODO: use aggregate for performance !
+            from operator import attrgetter
+            try:
+                total = max(self.stage.story_set.all(), key=attrgetter("order")) + 1
+            except ValueError:
+                total = 1
+            self.order = total
             self.save()
 
     def __unicode__(self):
