@@ -121,9 +121,6 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.admin',
 
-    # 3hd party applications
-    'piston',
-
     # scrumboard applicatons
     'scrumboard.board',
 )

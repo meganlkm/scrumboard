@@ -33,6 +33,8 @@ class StoryResource(ModelResource):
 
     def obj_update(self, bundle, request=None, **kwargs):
         #stage = Stage.objects.get(id=bundle.data.pop("stage")["id"])
+        if 'order' in bundle.data and not bundle.data['order']:
+            bundle.data['order'] = 1
         return super(StoryResource, self).obj_update(bundle, request)
 
     class Meta:

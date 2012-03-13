@@ -41,7 +41,7 @@ class Story(models.Model):
     stage = models.ForeignKey(Stage)
     description = models.TextField()
     color = models.CharField(max_length=30, choices=COLOR_CHOICES)
-    order = models.IntegerField(blank=True, null=True)
+    order = models.IntegerField(default=1)
 
     class Meta:
         ordering = ["order", ]
