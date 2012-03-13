@@ -36,18 +36,14 @@ class StoryResource(ModelResource):
         Haddinden fazla pis. Heroku uzerinde cok degisilik olaylar donuyor.
         Simdilik boyle.
         """
-
-        story = Story.objects.get(id=kwargs.get("id"))
-        story.description = kwargs.get("description")
-        story.color = kwargs.get("color")
-        story.stage_id = kwargs.get("stage").get("id")
-        story.order = kwargs.get("order")
+        story = Story.objects.get(id=kwargs.get("pk"))
+        story.description = bundle.data.get("description")
+        story.color = bundle.data.get("color")
+        story.stage_id = bundle.data.get("stage").get("id")
+        story.order = bundle.data.get("order")
         story.save()
-
-#        #stage = Stage.objects.get(id=bundle.data.pop("stage")["id"])
-#        if 'order' in bundle.data and not bundle.data['order']:
-#            bundle.data['order'] = 1
-#        return super(StoryResource, self).obj_update(bundle, request)
+        #stage = Stage.objects.get(id=bundle.data.pop("stage")["id"])#
+        #return super(StoryResource, self).obj_update(bundle, request)
 
     class Meta:
         queryset = Story.objects.all()
