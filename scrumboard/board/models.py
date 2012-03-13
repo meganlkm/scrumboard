@@ -47,7 +47,6 @@ class Story(models.Model):
         ordering = ["order", ]
 
     def save(self, **kwargs):
-        super(Story, self).save(**kwargs)
         if self.pk and not self.order:
             # self.order = (self.stage.story_set.aggregate(Max("order")).get("order__max") or 0)  + 1
             # TODO: use aggregate for performance !
@@ -58,6 +57,7 @@ class Story(models.Model):
                 total = 1
             self.order = total
             self.save()
+        super(Story, self).save(**kwargs)
 
     def __unicode__(self):
         return smart_unicode(self.description)
