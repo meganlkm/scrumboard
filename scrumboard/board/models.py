@@ -23,6 +23,9 @@ class Stage(models.Model):
     order = models.IntegerField()
     title = models.CharField(max_length=30, choices=STAGE_CHOICES)
 
+    class Meta:
+        ordering = ["order", ]
+
     def __unicode__(self):
         return smart_unicode(self.title)
 
