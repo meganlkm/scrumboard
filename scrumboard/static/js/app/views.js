@@ -149,9 +149,11 @@ var BoardSetView = Backbone.View.extend({
     },
     new_board : function () {
         var board_title = window.prompt("Title ?");
-        var board = new Board({"title" : board_title})
-        board.save()
-        this.model.fetch()
+        if (board_title) {
+            var board = new Board({"title" : board_title})
+            board.save()
+            this.model.fetch()
+        }
     },
     initialize : function () {
         var self = this;
@@ -176,12 +178,14 @@ var BoardView = Backbone.View.extend({
     },
     events : {
         "click .destroy" : 'destroy',
-        "click .change" : 'change',
+        "click .change" : 'change'
     },
     change : function () {
         var title = window.prompt("Title ?", this.model.get("title"))
-        this.model.set("title", title)
-        this.model.save({ success: this.render })
+        if (title) {
+            this.model.set("title", title)
+            this.model.save({ success: this.render })
+        }
     },
     destroy : function () {
         this.model.destroy({

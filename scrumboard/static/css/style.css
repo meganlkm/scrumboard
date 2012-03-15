@@ -72,6 +72,24 @@ h3 {
     height: 20px;
 }
 
+footer {
+    position: fixed;
+    bottom: 0px;
+    width: 150px;
+
+}
+
+.change, .destroy {
+    display: none;
+}
+
+footer a {
+    display: block;
+    padding: 3px;
+    background: #d0e0eb;
+}
+
+footer a:hover{ background: #49708a; color: white;}
 /* STICKY NOTES */
 
 .stories li.story a {
@@ -89,6 +107,7 @@ h3 {
     -moz-transition:-moz-transform .3s linear;
     -o-transition:-o-transform .3s linear;
     -webkit-transition:-webkit-transform .3s linear;
+    line-height: 24px;
 
 }
 
