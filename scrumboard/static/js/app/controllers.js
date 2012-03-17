@@ -17,11 +17,11 @@ var AppRouter = Backbone.Router.extend({
         this.boards.on("reset", _select_board);
         _select_board();
         var stages = new StageSet();
-        new StageSetView({model:stages})
+        this.stageset_view = new StageSetView({model:stages})
         stages.fetch({data:{board:id}})
         this.active_board = new Board({id : id})
-        new BoardView({model:this.active_board})
-        active_board.fetch()
+        this.board_view = new BoardView({model:this.active_board})
+        this.active_board.fetch()
 
     }
 })
