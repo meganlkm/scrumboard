@@ -79,10 +79,6 @@ footer {
 
 }
 
-.change, .destroy {
-    display: none;
-}
-
 footer a {
     display: block;
     padding: 3px;
