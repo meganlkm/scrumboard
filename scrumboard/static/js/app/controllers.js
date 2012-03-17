@@ -19,9 +19,9 @@ var AppRouter = Backbone.Router.extend({
         var stages = new StageSet();
         new StageSetView({model:stages})
         stages.fetch({data:{board:id}})
-        var board = new Board({id : id})
-        new BoardView({model:board})
-        board.fetch()
+        this.active_board = new Board({id : id})
+        new BoardView({model:this.active_board})
+        active_board.fetch()
 
     }
 })

@@ -86,6 +86,9 @@ footer a {
 }
 
 footer a:hover{ background: #49708a; color: white;}
+
+.nav-tabs { margin-top: 10px; }
+
 /* STICKY NOTES */
 
 .stories li.story a {
