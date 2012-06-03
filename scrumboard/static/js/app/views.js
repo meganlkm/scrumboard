@@ -5,7 +5,6 @@ var StoryView = Backbone.View.extend({
         'click a' : 'edit_story'
     },
     edit_story : function () {
-        var self = this;
         $("#story-form").html(_.template($("#StoryForm").html())( {} ))
         $("#story-form").modal("show");
 
@@ -15,16 +14,16 @@ var StoryView = Backbone.View.extend({
         $("#story-form").find("h2").html("Edit Story")
 
         // save action
-        $("#story-form").find(".save").click(function () {
+        $("#story-form").find(".save").click(_.bind(function () {
             var data = {}
             var form_data = $("#story-form form").serializeArray();
             for (var i in form_data) {
                 data[form_data[i].name]=form_data[i].value;
             }
-            self.model.set(data)
-            self.model.save(data);
+            this.model.set(data)
+            this.model.save(data);
             $("#story-form").modal("hide");
-        })
+        }, this))
 
     },
     initialize: function () {
@@ -43,7 +42,6 @@ var StorySetView = Backbone.View.extend({
         this.stage = options["stage"];
         this.model.bind("reset", this.render, this);
         this.model.bind("add", this.render, this);
-        var self = this;
         $(this.el).sortable({
             items: "li:not(.not-sortable)",
             connectWith: ".stage ul",
@@ -62,7 +60,6 @@ var StorySetView = Backbone.View.extend({
                 })
             }
         }).data("stage", this.stage);
-
     },
     events : {
         'click .new' : 'new_story'
@@ -78,14 +75,13 @@ var StorySetView = Backbone.View.extend({
         this.model.add(story);
     },
     render : function () {
-        var self = this;
-        $(self.el).empty()
-        _.each(this.model.models, function (story) {
-            $(self.el).append(  new StoryView({model:story}).render().el  )
-        })
-        $(self.el).append("<li class='drop'>");
-        $(self.el).append($("<li style='' class='not-sortable'>").html($("<a class='new btn btn-large'>").html("New")))
-        return self;
+        $(this.el).empty()
+        _.forEach(this.model.models, function (story) {
+            $(this.el).append(  new StoryView({model:story}).render().el  )
+        }, this)
+        $(this.el).append("<li class='drop'>");        
+        $(this.el).append($("<li style='' class='not-sortable'>").html($("<a class='new btn btn-large'>").html("New")))
+        return this;
     }
 })
 
@@ -94,7 +90,6 @@ var StageItemView = Backbone.View.extend({
     template : _.template( $("#StageTemplate").html()),
     initialize : function () {
         this.model.bind('change', this.render, this)
-        //this.model.stories.bind('reset', this.fillStories, this)
         this.stories = new StorySet()
         this.storyset_view = new StorySetView({model:this.stories}, {stage:this.model})
         this.stories.fetch( {data:{stage : this.model.get("id")}} )
@@ -113,19 +108,18 @@ var StageSetView = Backbone.View.extend({
         this.model.bind('reset', this.render, this)
     },
     render : function () {
-        var self = this;
-        $(self.el).empty()
-        _.each(self.model.models, function (stage) {
-            $(self.el).append(  new StageItemView({model:stage}).render().el  )
+        $(this.el).empty()
+        _.each(this.model.models, function (stage) {
+            $(this.el).append(new StageItemView({model:stage}).render().el)
         }, this)
-        return self;
+        return this;
     }
 
 })
 
 var BoardItemView = Backbone.View.extend({
     tagName : "li" ,
-    template : _.template( $("#BoardItemTemplate").html()),
+    template : _.template($("#BoardItemTemplate").html()),
     events : {
         "click a" : "make_active"
     },
@@ -155,17 +149,15 @@ var BoardSetView = Backbone.View.extend({
         this.model.fetch()
     },
     initialize : function () {
-        var self = this;
         this.boarditem_views = []
         this.model.bind("reset", this.render, this);
         this.model.bind("add", this.render, this);
     },
     render : function () {
-        var self = this;
         $(this.el).find("ul").empty();
         _.forEach(this.model.models, function (item) {
-            $(self.el).find("ul").append(   (new BoardItemView({model:item})).render().el   )
-        })
+            $(this.el).find("ul").append((new BoardItemView({model:item})).render().el)
+        }, this)
         return this;
     }
 })
