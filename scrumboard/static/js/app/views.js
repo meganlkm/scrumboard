@@ -5,25 +5,27 @@ var StoryView = Backbone.View.extend({
         'click a' : 'edit_story'
     },
     edit_story : function () {
-        $("#story-form").html(_.template($("#StoryForm").html())( {} ))
+        $("#story-form").html(_.template($("#StoryForm").html()));
         $("#story-form").modal("show");
 
         // populate fields
-        $("#story-form #description").val(this.model.get("description"))
-        $("#story-form #color").val(this.model.get("color"))
-        $("#story-form").find("h2").html("Edit Story")
+        $("#story-form #description").val(this.model.get("description"));
+        $("#story-form #color").val(this.model.get("color"));
+        $("#story-form").find("h2").html("Edit Story");
 
         // save action
-        $("#story-form").find(".save").click(_.bind(function () {
-            var data = {}
-            var form_data = $("#story-form form").serializeArray();
-            for (var i in form_data) {
-                data[form_data[i].name]=form_data[i].value;
-            }
-            this.model.set(data)
-            this.model.save(data);
-            $("#story-form").modal("hide");
-        }, this))
+        $("#story-form")
+            .find(".save")
+            .click(_.bind(function () {
+               var data = {}
+               var form_data = $("#story-form form").serializeArray();
+               for (var i in form_data) {
+                   data[form_data[i].name]=form_data[i].value;
+               }
+               this.model.set(data)
+               this.model.save(data);
+               $("#story-form").modal("hide");
+           }, this))
 
     },
     initialize: function () {
