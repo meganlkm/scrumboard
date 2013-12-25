@@ -1,5 +1,5 @@
 from django.contrib import admin
-from board.models import Board, Stage, Story
+from scrumboard.board.models import Board, Stage, Story
 
 
 class StageInline(admin.TabularInline):

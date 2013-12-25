@@ -1,5 +1,5 @@
 # Django settings for scrumboard project.
-from utils import here
+from scrumboard.utils import here
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
