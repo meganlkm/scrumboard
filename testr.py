@@ -20,7 +20,7 @@ def getall():
     l=json.loads(c)
     all=l["objects"]
     for one in all:
-        print one
+        print one["id"],one["title"]
 def newBoard():
     url = "http://localhost:8000/api/board/"
     postdata = {"collection": "/api/board/1/",'title': 'w1'} #urllib.urlencode([('q','python')])# urllib.urlencode({'value': 'v', 'result': 'r'})
@@ -34,24 +34,22 @@ def newBoard():
     c=r.text
     l=json.loads(c)
     print l["traceback"]
-def deleteContact():
-    url = "http://localhost:8000/api/board/1/"
+def deleteBoard(vid):
+    url = "http://localhost:8000/api/board/"+str(vid)+"/"
     headers = {'content-type': 'application/json'}
     params = {'format':'json'}
-    print requests.delete(url,data=json.dumps(params), headers=headers).text 
-def getContactbywtr():
-    url = "http://localhost:8000/api/board/"
-    params = {'format':'json',"apikey":"tetetgegegwt","wtr":"xs"}
-    c=requests.get(url,params=params).content
-    print c
+    r=requests.delete(url,data=json.dumps(params), headers=headers)
+    print r.status_code
+    print r.reason
+    print r.text 
 if __name__=="__main__":
     # highest()
     # xml()
     # schema()
     # getbywtr()
     # print "getall==========================="
-    #getall()
-    newBoard()
-    #deletecollection()
+    getall()
+    #newBoard()
+    deleteBoard(3)
     #newCollection()
     #getContact("mahongquan")
