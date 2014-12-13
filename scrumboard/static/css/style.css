@@ -92,8 +92,8 @@ footer a:hover{ background: #49708a; color: white;}
 /* STICKY NOTES */
 
 .stories li.story a {
-    font-family: 'Kaushan Script', cursive;
-    font-size:24px;
+    font-family: Verdana, Arial, Helvetica, sans-serif;
+    font-size: 16px;
     text-decoration:none;
     color: #262626;
     display:block;
