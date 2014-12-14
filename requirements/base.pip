@@ -1,4 +1,5 @@
 Django==1.7.1
+django-requestlogging==1.0.1
 django-tastypie==0.12.1
 python-dateutil==2.3
 python-mimeparse==0.1.4
