@@ -1,3 +1,5 @@
+""" scrumboard decorators """
+
 from decorator import decorator
 from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response

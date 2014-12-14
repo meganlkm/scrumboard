@@ -1,41 +1,56 @@
-from django.http import HttpResponse
+""" board api """
+
 from tastypie.authorization import Authorization
 from tastypie.resources import ModelResource
 from tastypie import fields
-from tastypie.constants import ALL_WITH_RELATIONS
 from scrumboard.board.models import Story, Board, Stage
 
+
 class BoardResource(ModelResource):
+
+    """ board resource """
+
     def obj_create(self, bundle, request=None, **kwargs):
-        kwargs["user_id"] = 1 # TODO: Authentication
+        """ create object """
+        # TODO: Authentication
+        kwargs["user_id"] = 1
         return super(BoardResource, self).obj_create(bundle, **kwargs)
 
     class Meta:
         queryset = Board.objects.all()
+        resource_name = 'board'
         #include_resource_uri = False
         authorization = Authorization()
 
+
 class StageResource(ModelResource):
-    board = fields.ForeignKey(BoardResource, 'board',full=True)
+
+    """ stage resource """
+
+    board = fields.ForeignKey(BoardResource, 'board', full=True)
+
     class Meta:
         queryset = Stage.objects.all()
         #include_resource_uri = False
         authorization = Authorization()
         filtering = {
-            "board" : ('exact', )
+            "board": ('exact',)
         }
 
+
 class StoryResource(ModelResource):
-    stage = fields.ForeignKey(BoardResource, 'stage',full=True)
+
+    """ story resource """
+
+    stage = fields.ForeignKey(BoardResource, 'stage', full=True)
+
     def obj_create(self, bundle, request=None, **kwargs):
+        """ create object """
         stage = Stage.objects.get(id=bundle.data.pop("stage")["id"])
         return super(StoryResource, self).obj_create(bundle, stage=stage)
 
     def obj_update(self, bundle, request=None, **kwargs):
-        """
-        Haddinden fazla pis. Heroku uzerinde cok degisilik olaylar donuyor.
-        Simdilik boyle.
-        """
+        """ update object """
         story = Story.objects.get(id=kwargs.get("pk"))
         story.description = bundle.data.get("description")
         story.color = bundle.data.get("color")
@@ -50,5 +65,5 @@ class StoryResource(ModelResource):
         #include_resource_uri = False
         authorization = Authorization()
         filtering = {
-            "stage" : ('exact', )
+            "stage": ('exact',)
         }

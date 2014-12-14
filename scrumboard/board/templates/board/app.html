@@ -4,7 +4,7 @@
     <script>
         new AppRouter();
         Backbone.history.start({pushState: true});
-        
+
         if (Backbone.history && Backbone.history._hasPushState) {
             $(document).delegate("a", "click", function(evt) {
                 var href = $(this).attr("href");
@@ -15,7 +15,7 @@
                 }
             });
         }
-        
+
     </script>
 {% endblock %}
 
@@ -31,7 +31,7 @@
 
 {% block content %}
     <div id="select-board">
-        <a style="float:right; margin-top:4px; margin-bottom:3px;" class="btn new" 
+        <a style="float:right; margin-top:4px; margin-bottom:3px;" class="btn new"
         href="javascript:void 0">Add Board</a>
          <ul class="nav nav-tabs"></ul>
     </div>
@@ -59,7 +59,7 @@
             </form>
         </div>
         <div class="modal-footer">
-            <a href="javascript: void 0" class="btn save btn-primary">Save changes</a>        
+            <a href="javascript: void 0" class="btn save btn-primary">Save changes</a>
         </div>
     </script>
 

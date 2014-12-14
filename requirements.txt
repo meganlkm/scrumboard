@@ -1,2 +1,1 @@
-Django==1.6
-django-tastypie==0.9.15
+-r requirements/local.pip
